@@ -7,11 +7,12 @@
 #include <glm.hpp>
 #include <gtc\matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-#include "..\Shader.h"
+#include "Shader.h"
 #include <SOIL.h>
 
 using namespace glm;
 using namespace std;
+
 const GLint WIDTH = 800, HEIGHT = 600;
 bool WIDEFRAME = false;
 bool paintQuad = false;
