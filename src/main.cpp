@@ -12,16 +12,30 @@
 
 using namespace glm;
 using namespace std;
+
 const GLint WIDTH = 800, HEIGHT = 600;
+
 bool WIDEFRAME = false;
 bool paintQuad = false;
 bool fade1 = false;
+
+int deltaTime;
+int actualTime = 1;
+int lastFrame = 0;
+
 float mixStuff;
 float rotacionX,rotacionY = 0.0f;
 float gradosRot = 0;
 float aumentoRot;
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-bool aumentarRotRight, aumentarRotLeft,aumentarUp,aumentarDown;
+
+bool aumentarRotRight, aumentarRotLeft, aumentarUp, aumentarDown, moveCamRight, moveCamLeft, moveCamZ, moveCamZNeg;
+
+vec3 camera(0.0f, 0.0f, -3.0f);
+vec3 cameraPosVec(0.0f, 0.0f, 3.0f);
+vec3 cameraDirVec(0.0f, 0.0f, 0.0f);
+
 void DrawVao(GLuint programID, GLuint VAO) {
 	//establecer el shader
 	glUseProgram(programID);
@@ -48,6 +62,23 @@ mat4 GenerateModelMatrix(vec3 aTranslation, vec3 aRotation, vec3 CubesPosition, 
 	return temp;
 }
 
+void glfwSetInputMode(GLFWwindow *  window, int mode, int  value) {
+	window = window;
+	mode = GLFW_CURSOR;
+	value = GLFW_CURSOR_HIDDEN;
+}
+
+
+void MouseEntry(GLFWwindow* window, double xpos, double ypos){
+	window = window;
+	xpos = 0;
+	ypos = 0;
+}
+
+void ApplyOffset(GLFWwindow* window, double xoffset, double yoffset) {
+
+}
+
 void main() {
 	mixStuff = 0.0f;
 	//initGLFW
@@ -65,7 +96,6 @@ void main() {
 	//create a window
 	//TODO
 	GLFWwindow* window;
-
 
 
 	window = glfwCreateWindow(WIDTH, HEIGHT, "Primera ventana", nullptr, nullptr);
@@ -302,6 +332,7 @@ void main() {
 	glEnable(GL_DEPTH_TEST);
 	//bucle de dibujado
 
+	cameraDirVec = vec3(.0f, .0f, .0f) - cameraPosVec;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -371,8 +402,26 @@ void main() {
 		
 		//pintar con lineas
 		//pintar con triangulos
+		
+		deltaTime = actualTime - lastFrame;
+		lastFrame = actualTime;
+		lastFrame++;
 
-		if (aumentarRotLeft) {
+		if (moveCamLeft) {
+			camera.x = camera.x + 0.015f;
+		}
+		else if (moveCamRight) {
+			camera.x = camera.x - 0.015f;
+		}
+
+		if (moveCamZ) {
+			camera.z = camera.z + 0.015f;
+		}
+		else if (moveCamZNeg) {
+			camera.z = camera.z + 0.015f;
+		}
+
+	/*	if (aumentarRotLeft) {
 			rotacionY-=aumentoRot;
 		}
 		else if (aumentarRotRight) {
@@ -395,7 +444,17 @@ void main() {
 			if (mixStuff>0.01f) {
 				mixStuff -= 0.01f;
 			}
-		}
+		}*/
+
+		glfwSetCursorPosCallback(window, MouseEntry);
+		glfwSetScrollCallback(window, ApplyOffset);
+
+		/*GLfloat radio = 8.0f;
+		GLfloat X = sin(glfwGetTime()) * radio;
+		GLfloat Z = cos(glfwGetTime()) * radio;
+		glm::mat4 view;
+		view = glm::lookAt(glm::vec3(X, 0.0, Z), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));*/
+
 
 		//matriz = translate(matriz, vec3(0.5f, 0.5f, 0));
 
@@ -406,7 +465,8 @@ void main() {
 
 		proj = perspective(FOV, (float)(800/600), 0.1f, 100.0f);
 
-		cam = translate(cam, vec3(0.0f, 0.0f, -3.0f));
+		cam = translate(cam, camera);
+
 		//glUniformMatrix4fv(matProjID, 1, GL_FALSE, glm::value_ptr(proj));
 		//glUniformMatrix4fv(matViewID, 1, GL_FALSE, glm::value_ptr(cam));
 
@@ -456,7 +516,35 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
 	if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-		paintQuad = !paintQuad;
+		moveCamZNeg = true;
+	}
+
+	if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
+		moveCamZNeg = false;
+	}
+
+	if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+		moveCamZ = true;
+	}
+
+	if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
+		moveCamZ = false;
+	}
+
+	if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+		moveCamLeft = true;
+	}
+
+	if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
+		moveCamLeft = false;
+	}
+
+	if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+		moveCamRight = true;
+	}
+
+	if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
+		moveCamRight = false;
 	}
 
 	if (key == GLFW_KEY_UP&&action == GLFW_PRESS) {
